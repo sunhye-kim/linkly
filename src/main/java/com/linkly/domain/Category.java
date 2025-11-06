@@ -6,7 +6,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "category")
+@Table(
+    name = "category",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "ux_user_category_name",
+            columnNames = {"app_user_id", "name"}
+        )
+    }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -18,7 +26,11 @@ public class Category extends BaseTimeEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 50)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "app_user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_category_user"))
+    private AppUser appUser;
+
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
     @Column(name = "description", length = 255)
