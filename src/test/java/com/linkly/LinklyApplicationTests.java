@@ -1,4 +1,4 @@
-package com.example.linkly;
+package com.linkly;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

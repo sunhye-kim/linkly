@@ -1,4 +1,4 @@
-package com.example.linkly.config;
+package com.linkly.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

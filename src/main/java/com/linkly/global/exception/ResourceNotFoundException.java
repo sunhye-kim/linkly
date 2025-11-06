@@ -1,4 +1,4 @@
-package com.example.linkly.exception;
+package com.linkly.global.exception;
 
 public class ResourceNotFoundException extends BusinessException {
 

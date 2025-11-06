@@ -1,4 +1,4 @@
-package com.example.linkly.dto;
+package com.linkly.global.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

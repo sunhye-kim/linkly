@@ -1,4 +1,4 @@
-package com.example.linkly.domain;
+package com.linkly.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

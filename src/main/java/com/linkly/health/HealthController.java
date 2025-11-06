@@ -1,6 +1,6 @@
-package com.example.linkly.controller;
+package com.linkly.health;
 
-import com.example.linkly.dto.ApiResponse;
+import com.linkly.global.dto.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

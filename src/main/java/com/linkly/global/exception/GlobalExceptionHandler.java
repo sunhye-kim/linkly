@@ -1,6 +1,6 @@
-package com.example.linkly.exception;
+package com.linkly.global.exception;
 
-import com.example.linkly.dto.ApiResponse;
+import com.linkly.global.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
