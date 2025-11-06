@@ -32,6 +32,16 @@ public class AppUser extends BaseTimeEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    // 비즈니스 로직 메서드
+    public void updateInfo(String password, String name) {
+        if (password != null && !password.isBlank()) {
+            this.password = password;
+        }
+        if (name != null && !name.isBlank()) {
+            this.name = name;
+        }
+    }
+
     // 소프트 삭제 관련 메서드
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
