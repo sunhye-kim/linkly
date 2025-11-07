@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class HealthResponse {
 
-    @Schema(description = "서비스 상태", example = "UP")
-    private String status;
+	@Schema(description = "서비스 상태", example = "UP")
+	private String status;
 
-    @Schema(description = "서비스 이름", example = "Linkly API Server")
-    private String service;
+	@Schema(description = "서비스 이름", example = "Linkly API Server")
+	private String service;
 }

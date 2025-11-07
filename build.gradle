@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.linkly'
@@ -42,4 +43,15 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// Spotless - 코드 자동 포매팅 (Python의 black과 유사)
+spotless {
+    java {
+        target 'src/**/*.java'
+        eclipse()  // Eclipse formatter - 4칸 들여쓰기 (Java 표준)
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }

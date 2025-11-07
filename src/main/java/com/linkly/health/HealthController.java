@@ -13,14 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class HealthController {
 
-    @Operation(summary = "헬스 체크", description = "서버의 현재 상태를 확인합니다.")
-    @GetMapping("/health")
-    public ApiResponse<HealthResponse> health() {
-        HealthResponse healthData = HealthResponse.builder()
-                .status("UP")
-                .service("Linkly API Server")
-                .build();
+	@Operation(summary = "헬스 체크", description = "서버의 현재 상태를 확인합니다.")
+	@GetMapping("/health")
+	public ApiResponse<HealthResponse> health() {
+		HealthResponse healthData = HealthResponse.builder().status("UP").service("Linkly API Server").build();
 
-        return ApiResponse.success(healthData);
-    }
+		return ApiResponse.success(healthData);
+	}
 }
