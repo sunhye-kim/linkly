@@ -1,6 +1,7 @@
 package com.linkly.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.linkly.domain.enums.UserRole;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -27,6 +28,11 @@ public class AppUser extends BaseTimeEntity {
 
 	@Column(name = "name", nullable = false, length = 100)
 	private String name;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "user_role", nullable = false, length = 20)
+	@Builder.Default
+	private UserRole role = UserRole.USER;
 
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;

@@ -5,6 +5,11 @@ spring:
   profiles:
     active: local
 
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-should-be-at-least-256-bits-for-HS256-algorithm-please-change-this-in-production}
+  expiration: ${JWT_EXPIRATION:86400000} # 24시간 (밀리초)
+
 # Swagger/OpenAPI 설정
 springdoc:
   api-docs:
