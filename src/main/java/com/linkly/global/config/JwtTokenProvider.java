@@ -3,7 +3,6 @@ package com.linkly.global.config;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +21,8 @@ public class JwtTokenProvider {
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + jwtProperties.getExpiration());
 
-		return Jwts.builder()
-				.setSubject(userId.toString())
-				.claim("email", email)
-				.setIssuedAt(now)
-				.setExpiration(expiryDate)
-				.signWith(getSigningKey(), SignatureAlgorithm.HS256)
-				.compact();
+		return Jwts.builder().subject(userId.toString()).claim("email", email).issuedAt(now).expiration(expiryDate)
+				.signWith(getSigningKey()).compact();
 	}
 
 	// JWT 토큰에서 사용자 ID 추출
@@ -62,15 +56,11 @@ public class JwtTokenProvider {
 
 	// JWT 토큰 파싱
 	private Claims parseToken(String token) {
-		return Jwts.parserBuilder()
-				.setSigningKey(getSigningKey())
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
+		return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
 	}
 
 	// 서명 키 생성
-	private Key getSigningKey() {
+	private SecretKey getSigningKey() {
 		byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}

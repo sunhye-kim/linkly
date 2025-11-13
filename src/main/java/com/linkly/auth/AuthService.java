@@ -32,13 +32,9 @@ public class AuthService {
 		}
 
 		// 사용자 생성
-		AppUser appUser =
-				AppUser.builder()
-						.email(request.getEmail())
-						.password(passwordEncoder.encode(request.getPassword()))
-						.name(request.getName())
-						.role(UserRole.USER)
-						.build();
+		AppUser appUser = AppUser.builder().email(request.getEmail())
+				.password(passwordEncoder.encode(request.getPassword())).name(request.getName()).role(UserRole.USER)
+				.build();
 
 		AppUser savedUser = appUserRepository.save(appUser);
 
@@ -54,10 +50,8 @@ public class AuthService {
 	@Transactional(readOnly = true)
 	public LoginResponse login(LoginRequest request) {
 		// 사용자 조회
-		AppUser appUser =
-				appUserRepository
-						.findByEmailAndDeletedAtIsNull(request.getEmail())
-						.orElseThrow(() -> new BadCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다."));
+		AppUser appUser = appUserRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
+				.orElseThrow(() -> new BadCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
 		// 비밀번호 확인
 		if (!passwordEncoder.matches(request.getPassword(), appUser.getPassword())) {
