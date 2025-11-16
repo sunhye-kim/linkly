@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @Tag(name = "User", description = "회원 관리 API")
 public class UserController {
@@ -32,7 +32,7 @@ public class UserController {
 	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원 가입 성공"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검증 실패 등)")})
 	public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
-		log.info("POST /api/users - 회원 가입 요청: email={}", request.getEmail());
+		log.info("POST /users - 회원 가입 요청: email={}", request.getEmail());
 
 		UserResponse response = userService.createUser(request);
 
@@ -45,7 +45,7 @@ public class UserController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")})
 	public ResponseEntity<ApiResponse<UserResponse>> getUserById(
 			@Parameter(description = "회원 ID", example = "1") @PathVariable Long id) {
-		log.info("GET /api/users/{} - 회원 조회", id);
+		log.info("GET /users/{} - 회원 조회", id);
 
 		UserResponse response = userService.getUserById(id);
 
@@ -59,11 +59,11 @@ public class UserController {
 	public ResponseEntity<ApiResponse<?>> getUsers(
 			@Parameter(description = "검색할 이메일 (선택)", example = "user@example.com") @RequestParam(required = false) String email) {
 		if (email != null && !email.isBlank()) {
-			log.info("GET /api/users?email={} - 이메일로 회원 조회", email);
+			log.info("GET /users?email={} - 이메일로 회원 조회", email);
 			UserResponse response = userService.getUserByEmail(email);
 			return ResponseEntity.ok(ApiResponse.success(response));
 		} else {
-			log.info("GET /api/users - 전체 회원 조회");
+			log.info("GET /users - 전체 회원 조회");
 			List<UserResponse> responses = userService.getAllUsers();
 			return ResponseEntity.ok(ApiResponse.success(responses));
 		}
@@ -77,7 +77,7 @@ public class UserController {
 	public ResponseEntity<ApiResponse<UserResponse>> updateUser(
 			@Parameter(description = "회원 ID", example = "1") @PathVariable Long id,
 			@Valid @RequestBody UpdateUserRequest request) {
-		log.info("PUT /api/users/{} - 회원 정보 수정", id);
+		log.info("PUT /users/{} - 회원 정보 수정", id);
 
 		UserResponse response = userService.updateUser(id, request);
 
@@ -90,7 +90,7 @@ public class UserController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "삭제 성공", content = @Content(schema = @Schema(hidden = true))),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")})
 	public ResponseEntity<Void> deleteUser(@Parameter(description = "회원 ID", example = "1") @PathVariable Long id) {
-		log.info("DELETE /api/users/{} - 회원 삭제", id);
+		log.info("DELETE /users/{} - 회원 삭제", id);
 
 		userService.deleteUser(id);
 

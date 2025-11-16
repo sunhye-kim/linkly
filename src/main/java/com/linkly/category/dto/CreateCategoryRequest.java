@@ -16,10 +16,6 @@ import lombok.NoArgsConstructor;
 @Schema(description = "카테고리 생성 요청")
 public class CreateCategoryRequest {
 
-	@NotNull(message = "사용자 ID는 필수입니다")
-	@Schema(description = "사용자 ID (인증 도입 후 제거 예정)", example = "1")
-	private Long userId;
-
 	@NotBlank(message = "카테고리 이름은 필수입니다")
 	@Size(min = 1, max = 50, message = "카테고리 이름은 1자 이상 50자 이하여야 합니다")
 	@Schema(description = "카테고리 이름", example = "개발")

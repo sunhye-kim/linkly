@@ -18,10 +18,6 @@ import org.hibernate.validator.constraints.URL;
 @Schema(description = "북마크 생성 요청")
 public class CreateBookmarkRequest {
 
-	@NotNull(message = "사용자 ID는 필수입니다")
-	@Schema(description = "사용자 ID (인증 도입 후 제거 예정)", example = "1")
-	private Long userId;
-
 	@NotBlank(message = "URL은 필수입니다")
 	@URL(message = "유효한 URL 형식이어야 합니다")
 	@Size(max = 500, message = "URL은 500자 이하여야 합니다")

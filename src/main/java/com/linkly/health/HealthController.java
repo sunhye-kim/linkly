@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Health Check", description = "서버 상태 확인 API")
 @RestController
-@RequestMapping("/api")
 public class HealthController {
 
 	@Operation(summary = "헬스 체크", description = "서버의 현재 상태를 확인합니다.")
