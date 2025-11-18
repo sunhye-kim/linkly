@@ -17,18 +17,20 @@ import com.linkly.category.dto.CreateCategoryRequest;
 import com.linkly.category.dto.UpdateCategoryRequest;
 import com.linkly.global.exception.InvalidRequestException;
 import com.linkly.global.exception.ResourceNotFoundException;
+import com.linkly.global.security.WithMockCustomUser;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(CategoryController.class)
+@WebMvcTest(controllers = CategoryController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 @DisplayName("CategoryController 테스트")
 class CategoryControllerTest {
 
@@ -41,11 +43,18 @@ class CategoryControllerTest {
 	@MockitoBean
 	private CategoryService categoryService;
 
+	@MockitoBean
+	private com.linkly.global.config.JwtTokenProvider jwtTokenProvider;
+
+	@MockitoBean
+	private com.linkly.auth.CustomUserDetailsService customUserDetailsService;
+
 	@Test
-	@DisplayName("POST /api/categories - 카테고리 생성 성공")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("POST /categories - 카테고리 생성 성공")
 	void createCategory_Success() throws Exception {
 		// given
-		CreateCategoryRequest request = CreateCategoryRequest.builder().userId(1L).name("개발").description("개발 관련 북마크")
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").description("개발 관련 북마크")
 				.build();
 
 		CategoryResponse response = CategoryResponse.builder().id(1L).userId(1L).name("개발").description("개발 관련 북마크")
@@ -54,7 +63,7 @@ class CategoryControllerTest {
 		given(categoryService.createCategory(eq(1L), any(CreateCategoryRequest.class))).willReturn(response);
 
 		// when & then
-		mockMvc.perform(post("/api/categories").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/categories").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.id").value(1L))
 				.andExpect(jsonPath("$.data.name").value("개발")).andExpect(jsonPath("$.data.userId").value(1L));
@@ -63,35 +72,25 @@ class CategoryControllerTest {
 	}
 
 	@Test
-	@DisplayName("POST /api/categories - 유효성 검증 실패 (userId 없음)")
-	void createCategory_MissingUserId() throws Exception {
-		// given
-		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").build();
-
-		// when & then
-		mockMvc.perform(post("/api/categories").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.success").value(false));
-	}
-
-	@Test
-	@DisplayName("POST /api/categories - 이름 중복")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("POST /categories - 이름 중복")
 	void createCategory_DuplicateName() throws Exception {
 		// given
-		CreateCategoryRequest request = CreateCategoryRequest.builder().userId(1L).name("개발").build();
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").build();
 
 		given(categoryService.createCategory(eq(1L), any(CreateCategoryRequest.class)))
 				.willThrow(new InvalidRequestException("이미 사용 중인 카테고리 이름입니다", "name=개발"));
 
 		// when & then
-		mockMvc.perform(post("/api/categories").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/categories").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("이미 사용 중인 카테고리 이름입니다"));
 	}
 
 	@Test
-	@DisplayName("GET /api/categories/{id} - 카테고리 조회 성공")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("GET /categories/{id} - 카테고리 조회 성공")
 	void getCategoryById_Success() throws Exception {
 		// given
 		Long categoryId = 1L;
@@ -101,7 +100,7 @@ class CategoryControllerTest {
 		given(categoryService.getCategoryById(categoryId)).willReturn(response);
 
 		// when & then
-		mockMvc.perform(get("/api/categories/{id}", categoryId)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.id").value(categoryId))
 				.andExpect(jsonPath("$.data.name").value("개발"));
 
@@ -109,7 +108,8 @@ class CategoryControllerTest {
 	}
 
 	@Test
-	@DisplayName("GET /api/categories/{id} - 카테고리 없음 (404)")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("GET /categories/{id} - 카테고리 없음 (404)")
 	void getCategoryById_NotFound() throws Exception {
 		// given
 		Long categoryId = 999L;
@@ -117,12 +117,13 @@ class CategoryControllerTest {
 				.willThrow(new ResourceNotFoundException("Category", categoryId));
 
 		// when & then
-		mockMvc.perform(get("/api/categories/{id}", categoryId)).andDo(print()).andExpect(status().isNotFound())
+		mockMvc.perform(get("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.success").value(false));
 	}
 
 	@Test
-	@DisplayName("GET /api/categories?userId=1 - 사용자의 카테고리 목록 조회")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("GET /categories - 사용자의 카테고리 목록 조회")
 	void getCategoriesByUserId() throws Exception {
 		// given
 		Long userId = 1L;
@@ -136,7 +137,7 @@ class CategoryControllerTest {
 		given(categoryService.getCategoriesByUserId(userId)).willReturn(responses);
 
 		// when & then
-		mockMvc.perform(get("/api/categories").param("userId", userId.toString())).andDo(print())
+		mockMvc.perform(get("/categories")).andDo(print())
 				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.data", hasSize(2))).andExpect(jsonPath("$.data[0].name").value("개발"))
 				.andExpect(jsonPath("$.data[1].name").value("디자인"));
@@ -145,7 +146,8 @@ class CategoryControllerTest {
 	}
 
 	@Test
-	@DisplayName("PUT /api/categories/{id}?userId=1 - 카테고리 수정 성공")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("PUT /categories/{id} - 카테고리 수정 성공")
 	void updateCategory_Success() throws Exception {
 		// given
 		Long categoryId = 1L;
@@ -159,7 +161,7 @@ class CategoryControllerTest {
 				.willReturn(response);
 
 		// when & then
-		mockMvc.perform(put("/api/categories/{id}", categoryId).param("userId", userId.toString())
+		mockMvc.perform(put("/categories/{id}", categoryId)
 				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
 				.andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.data.name").value("프로그래밍"));
@@ -169,50 +171,53 @@ class CategoryControllerTest {
 	}
 
 	@Test
-	@DisplayName("PUT /api/categories/{id}?userId=2 - 권한 없음 (400)")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("PUT /categories/{id} - 권한 없음 (400)")
 	void updateCategory_Unauthorized() throws Exception {
 		// given
 		Long categoryId = 1L;
-		Long userId = 2L;
+		Long userId = 1L;
 		UpdateCategoryRequest request = UpdateCategoryRequest.builder().name("프로그래밍").build();
 
 		given(categoryService.updateCategory(eq(categoryId), eq(userId), any(UpdateCategoryRequest.class)))
 				.willThrow(new InvalidRequestException("해당 카테고리를 수정할 권한이 없습니다", "categoryId=" + categoryId));
 
 		// when & then
-		mockMvc.perform(put("/api/categories/{id}", categoryId).param("userId", userId.toString())
+		mockMvc.perform(put("/categories/{id}", categoryId)
 				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
 				.andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("해당 카테고리를 수정할 권한이 없습니다"));
 	}
 
 	@Test
-	@DisplayName("DELETE /api/categories/{id}?userId=1 - 카테고리 삭제 성공")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("DELETE /categories/{id} - 카테고리 삭제 성공")
 	void deleteCategory_Success() throws Exception {
 		// given
 		Long categoryId = 1L;
 		Long userId = 1L;
 
 		// when & then
-		mockMvc.perform(delete("/api/categories/{id}", categoryId).param("userId", userId.toString())).andDo(print())
+		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print())
 				.andExpect(status().isNoContent());
 
 		then(categoryService).should(times(1)).deleteCategory(categoryId, userId);
 	}
 
 	@Test
-	@DisplayName("DELETE /api/categories/{id}?userId=2 - 권한 없음 (400)")
+	@WithMockCustomUser(userId = 1L)
+	@DisplayName("DELETE /categories/{id} - 권한 없음 (400)")
 	void deleteCategory_Unauthorized() throws Exception {
 		// given
 		Long categoryId = 1L;
-		Long userId = 2L;
+		Long userId = 1L;
 
 		// void 메서드는 doThrow 사용
 		org.mockito.Mockito.doThrow(new InvalidRequestException("해당 카테고리를 삭제할 권한이 없습니다", "categoryId=" + categoryId))
 				.when(categoryService).deleteCategory(categoryId, userId);
 
 		// when & then
-		mockMvc.perform(delete("/api/categories/{id}", categoryId).param("userId", userId.toString())).andDo(print())
+		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print())
 				.andExpect(status().isBadRequest());
 	}
 }

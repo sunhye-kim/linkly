@@ -45,7 +45,7 @@ class CategoryServiceImplTest {
 	void createCategory_Success() {
 		// given
 		Long userId = 1L;
-		CreateCategoryRequest request = CreateCategoryRequest.builder().userId(userId).name("개발")
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발")
 				.description("개발 관련 북마크").build();
 
 		AppUser user = AppUser.builder().id(userId).email("test@example.com").password("password123").name("테스트")
@@ -75,7 +75,7 @@ class CategoryServiceImplTest {
 	void createCategory_UserNotFound() {
 		// given
 		Long userId = 999L;
-		CreateCategoryRequest request = CreateCategoryRequest.builder().userId(userId).name("개발").build();
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").build();
 
 		given(userRepository.findByIdAndDeletedAtIsNull(userId)).willReturn(Optional.empty());
 
@@ -91,7 +91,7 @@ class CategoryServiceImplTest {
 	void createCategory_DuplicateName() {
 		// given
 		Long userId = 1L;
-		CreateCategoryRequest request = CreateCategoryRequest.builder().userId(userId).name("개발").build();
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").build();
 
 		AppUser user = AppUser.builder().id(userId).email("test@example.com").password("password123").name("테스트")
 				.build();

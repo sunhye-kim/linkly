@@ -79,7 +79,7 @@ class BookmarkServiceImplTest {
 	void createBookmark_WithTags() {
 		// given
 		Long userId = 1L;
-		CreateBookmarkRequest request = CreateBookmarkRequest.builder().userId(userId).categoryId(1L)
+		CreateBookmarkRequest request = CreateBookmarkRequest.builder().categoryId(1L)
 				.url("https://example.com").title("테스트 북마크").description("테스트 설명").tags(Arrays.asList("Java", "Spring"))
 				.build();
 
@@ -111,7 +111,7 @@ class BookmarkServiceImplTest {
 	void createBookmark_WithoutTags() {
 		// given
 		Long userId = 1L;
-		CreateBookmarkRequest request = CreateBookmarkRequest.builder().userId(userId).url("https://example.com")
+		CreateBookmarkRequest request = CreateBookmarkRequest.builder().url("https://example.com")
 				.title("테스트 북마크").build();
 
 		given(userRepository.findByIdAndDeletedAtIsNull(userId)).willReturn(Optional.of(testUser));
@@ -132,7 +132,7 @@ class BookmarkServiceImplTest {
 	void createBookmark_UserNotFound() {
 		// given
 		Long userId = 999L;
-		CreateBookmarkRequest request = CreateBookmarkRequest.builder().userId(userId).url("https://example.com")
+		CreateBookmarkRequest request = CreateBookmarkRequest.builder().url("https://example.com")
 				.title("테스트 북마크").build();
 
 		given(userRepository.findByIdAndDeletedAtIsNull(userId)).willReturn(Optional.empty());
@@ -147,7 +147,7 @@ class BookmarkServiceImplTest {
 	void createBookmark_DuplicateUrl() {
 		// given
 		Long userId = 1L;
-		CreateBookmarkRequest request = CreateBookmarkRequest.builder().userId(userId).url("https://example.com")
+		CreateBookmarkRequest request = CreateBookmarkRequest.builder().url("https://example.com")
 				.title("테스트 북마크").build();
 
 		given(userRepository.findByIdAndDeletedAtIsNull(userId)).willReturn(Optional.of(testUser));
@@ -163,7 +163,7 @@ class BookmarkServiceImplTest {
 	void createBookmark_CategoryUnauthorized() {
 		// given
 		Long userId = 1L;
-		CreateBookmarkRequest request = CreateBookmarkRequest.builder().userId(userId).categoryId(1L)
+		CreateBookmarkRequest request = CreateBookmarkRequest.builder().categoryId(1L)
 				.url("https://example.com").title("테스트 북마크").build();
 
 		AppUser otherUser = AppUser.builder().id(2L).email("other@example.com").password("password123").name("다른 사용자")

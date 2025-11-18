@@ -24,6 +24,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -34,7 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * 테스트) - Controller, ControllerAdvice, Filter 등만 로드 - Service는 Mock으로 대체 -
  * MockMvc를 사용한 HTTP 요청/응답 테스트
  */
-@WebMvcTest(UserController.class)
+@WebMvcTest(controllers = UserController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 @DisplayName("UserController 테스트")
 class UserControllerTest {
 
@@ -47,8 +48,14 @@ class UserControllerTest {
 	@MockitoBean
 	private UserService userService;
 
+	@MockitoBean
+	private com.linkly.global.config.JwtTokenProvider jwtTokenProvider;
+
+	@MockitoBean
+	private com.linkly.auth.CustomUserDetailsService customUserDetailsService;
+
 	@Test
-	@DisplayName("POST /api/users - 회원 가입 성공")
+	@DisplayName("POST /users - 회원 가입 성공")
 	void createUser_Success() throws Exception {
 		// given
 		CreateUserRequest request = CreateUserRequest.builder().email("test@example.com").password("password123")
@@ -60,7 +67,7 @@ class UserControllerTest {
 		given(userService.createUser(any(CreateUserRequest.class))).willReturn(response);
 
 		// when & then
-		mockMvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.id").value(1L))
 				.andExpect(jsonPath("$.data.email").value("test@example.com"))
@@ -70,20 +77,20 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("POST /api/users - 유효성 검증 실패 (이메일 형식 오류)")
+	@DisplayName("POST /users - 유효성 검증 실패 (이메일 형식 오류)")
 	void createUser_InvalidEmail() throws Exception {
 		// given
 		CreateUserRequest request = CreateUserRequest.builder().email("invalid-email") // 잘못된 이메일 형식
 				.password("password123").name("테스트 사용자").build();
 
 		// when & then
-		mockMvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.success").value(false));
 	}
 
 	@Test
-	@DisplayName("POST /api/users - 이메일 중복")
+	@DisplayName("POST /users - 이메일 중복")
 	void createUser_DuplicateEmail() throws Exception {
 		// given
 		CreateUserRequest request = CreateUserRequest.builder().email("duplicate@example.com").password("password123")
@@ -93,14 +100,14 @@ class UserControllerTest {
 				.willThrow(new InvalidRequestException("이미 사용 중인 이메일입니다", "email=" + request.getEmail()));
 
 		// when & then
-		mockMvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("이미 사용 중인 이메일입니다"));
 	}
 
 	@Test
-	@DisplayName("GET /api/users/{id} - 회원 조회 성공")
+	@DisplayName("GET /users/{id} - 회원 조회 성공")
 	void getUserById_Success() throws Exception {
 		// given
 		Long userId = 1L;
@@ -110,7 +117,7 @@ class UserControllerTest {
 		given(userService.getUserById(userId)).willReturn(response);
 
 		// when & then
-		mockMvc.perform(get("/api/users/{id}", userId)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/users/{id}", userId)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.id").value(userId))
 				.andExpect(jsonPath("$.data.email").value("test@example.com"));
 
@@ -118,19 +125,19 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("GET /api/users/{id} - 회원 없음 (404)")
+	@DisplayName("GET /users/{id} - 회원 없음 (404)")
 	void getUserById_NotFound() throws Exception {
 		// given
 		Long userId = 999L;
 		given(userService.getUserById(userId)).willThrow(new ResourceNotFoundException("User", userId));
 
 		// when & then
-		mockMvc.perform(get("/api/users/{id}", userId)).andDo(print()).andExpect(status().isNotFound())
+		mockMvc.perform(get("/users/{id}", userId)).andDo(print()).andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.success").value(false));
 	}
 
 	@Test
-	@DisplayName("GET /api/users - 전체 회원 조회")
+	@DisplayName("GET /users - 전체 회원 조회")
 	void getAllUsers() throws Exception {
 		// given
 		UserResponse user1 = UserResponse.builder().id(1L).email("user1@example.com").name("사용자1")
@@ -143,7 +150,7 @@ class UserControllerTest {
 		given(userService.getAllUsers()).willReturn(responses);
 
 		// when & then
-		mockMvc.perform(get("/api/users")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/users")).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data", hasSize(2)))
 				.andExpect(jsonPath("$.data[0].email").value("user1@example.com"))
 				.andExpect(jsonPath("$.data[1].email").value("user2@example.com"));
@@ -152,7 +159,7 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("GET /api/users?email=xxx - 이메일로 회원 검색")
+	@DisplayName("GET /users?email=xxx - 이메일로 회원 검색")
 	void getUserByEmail() throws Exception {
 		// given
 		String email = "test@example.com";
@@ -162,14 +169,14 @@ class UserControllerTest {
 		given(userService.getUserByEmail(email)).willReturn(response);
 
 		// when & then
-		mockMvc.perform(get("/api/users").param("email", email)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/users").param("email", email)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.email").value(email));
 
 		then(userService).should(times(1)).getUserByEmail(email);
 	}
 
 	@Test
-	@DisplayName("PUT /api/users/{id} - 회원 정보 수정 성공")
+	@DisplayName("PUT /users/{id} - 회원 정보 수정 성공")
 	void updateUser_Success() throws Exception {
 		// given
 		Long userId = 1L;
@@ -181,7 +188,7 @@ class UserControllerTest {
 		given(userService.updateUser(eq(userId), any(UpdateUserRequest.class))).willReturn(response);
 
 		// when & then
-		mockMvc.perform(put("/api/users/{id}", userId).contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put("/users/{id}", userId).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.name").value("수정된 이름"));
 
@@ -189,25 +196,25 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("DELETE /api/users/{id} - 회원 삭제 성공")
+	@DisplayName("DELETE /users/{id} - 회원 삭제 성공")
 	void deleteUser_Success() throws Exception {
 		// given
 		Long userId = 1L;
 
 		// when & then
-		mockMvc.perform(delete("/api/users/{id}", userId)).andDo(print()).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/users/{id}", userId)).andDo(print()).andExpect(status().isNoContent());
 
 		then(userService).should(times(1)).deleteUser(userId);
 	}
 
 	@Test
-	@DisplayName("DELETE /api/users/{id} - 회원 없음 (404)")
+	@DisplayName("DELETE /users/{id} - 회원 없음 (404)")
 	void deleteUser_NotFound() throws Exception {
 		// given
 		Long userId = 999L;
 		given(userService.getUserById(userId)).willThrow(new ResourceNotFoundException("User", userId));
 
 		// when & then
-		mockMvc.perform(get("/api/users/{id}", userId)).andDo(print()).andExpect(status().isNotFound());
+		mockMvc.perform(get("/users/{id}", userId)).andDo(print()).andExpect(status().isNotFound());
 	}
 }
