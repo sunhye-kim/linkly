@@ -23,6 +23,9 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
+				// CORS 설정
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
 				// CSRF 비활성화 (JWT 사용 시 필요)
 				.csrf(AbstractHttpConfigurer::disable)
 
@@ -51,5 +54,19 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+		org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+		configuration.addAllowedOrigin("http://localhost:3000"); // React 개발 서버
+		configuration.addAllowedOrigin("http://localhost:5173"); // Vite 기본 포트
+		configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
+		configuration.addAllowedHeader("*"); // 모든 헤더 허용
+		configuration.setAllowCredentials(true); // 쿠키/인증 정보 허용
+
+		org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 }
