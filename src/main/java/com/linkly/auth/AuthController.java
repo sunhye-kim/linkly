@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,5 +34,12 @@ public class AuthController {
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
 		LoginResponse response = authService.login(request);
 		return ResponseEntity.ok(response);
+	}
+
+	@Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자의 계정을 삭제합니다. (Soft Delete)")
+	@DeleteMapping("/withdraw")
+	public ResponseEntity<Void> withdraw() {
+		authService.withdraw();
+		return ResponseEntity.noContent().build();
 	}
 }

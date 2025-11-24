@@ -44,6 +44,20 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(e.getMessage()));
 	}
 
+	/** 인증되지 않은 접근 (SecurityUtils에서 발생하는 IllegalStateException) */
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<ApiResponse<Void>> handleIllegalStateException(IllegalStateException e) {
+		// SecurityUtils에서 발생하는 인증 관련 예외인 경우 403 Forbidden 반환
+		if (e.getMessage() != null && e.getMessage().contains("인증되지 않은")) {
+			log.warn("Unauthorized access: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(e.getMessage()));
+		}
+		// 그 외의 경우는 500 Internal Server Error로 처리
+		log.error("Illegal state exception occurred", e);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(ApiResponse.error("서버 내부 오류가 발생했습니다.", e.getMessage()));
+	}
+
 	/** Validation 예외 처리 (@Valid 실패) */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException e) {

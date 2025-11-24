@@ -1,9 +1,11 @@
 package com.linkly.global.security;
 
 import com.linkly.domain.AppUser;
+import com.linkly.domain.enums.UserRole;
 import java.util.Collections;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
@@ -21,11 +23,11 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
 
 		// @WithMockCustomUser 어노테이션의 파라미터로 AppUser 생성
 		AppUser principal = AppUser.builder().id(annotation.userId()).email(annotation.email()).name(annotation.name())
-				.password(annotation.password()).build();
+				.password(annotation.password()).role(UserRole.valueOf(annotation.role())).build();
 
-		// Authentication 객체 생성 (권한은 빈 리스트로 설정)
+		// Authentication 객체 생성 (권한 설정)
 		Authentication auth = new UsernamePasswordAuthenticationToken(principal, annotation.password(),
-				Collections.emptyList());
+				Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + annotation.role())));
 
 		context.setAuthentication(auth);
 		return context;

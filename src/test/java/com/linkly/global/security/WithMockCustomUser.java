@@ -12,7 +12,7 @@ import org.springframework.security.test.context.support.WithSecurityContext;
  * <pre>
  * {@code
  * &#64;Test
- * @WithMockCustomUser(userId = 1L, email = "test@example.com")
+ * @WithMockCustomUser(userId = 1L, email = "test@example.com", role = "USER")
  * void testMethod() {
  * 	// SecurityUtils.getCurrentUserId()가 1L을 반환
  * }
@@ -42,4 +42,9 @@ public @interface WithMockCustomUser {
 	 * 사용자 비밀번호 (기본값: "password123")
 	 */
 	String password() default "password123";
+
+	/**
+	 * 사용자 역할 (기본값: "USER")
+	 */
+	String role() default "USER";
 }

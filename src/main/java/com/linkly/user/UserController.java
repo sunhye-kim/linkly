@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -71,12 +72,14 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{id}")
-	@Operation(summary = "회원 탈퇴", description = "회원을 삭제합니다. (Soft Delete - 실제로는 삭제되지 않고 삭제 시간만 기록됩니다)")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "회원 삭제 (관리자 전용)", description = "관리자가 회원을 삭제합니다. (Soft Delete - 실제로는 삭제되지 않고 삭제 시간만 기록됩니다)")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "삭제 성공", content = @Content(schema = @Schema(hidden = true))),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음 (관리자만 가능)"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음")})
 	public ResponseEntity<Void> deleteUser(@Parameter(description = "회원 ID", example = "1") @PathVariable Long id) {
-		log.info("DELETE /users/{} - 회원 삭제", id);
+		log.info("DELETE /users/{} - 회원 삭제 (관리자)", id);
 
 		userService.deleteUser(id);
 

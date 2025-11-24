@@ -6,6 +6,8 @@ import com.linkly.auth.dto.SignupRequest;
 import com.linkly.domain.AppUser;
 import com.linkly.domain.enums.UserRole;
 import com.linkly.global.config.JwtTokenProvider;
+import com.linkly.global.exception.ResourceNotFoundException;
+import com.linkly.global.security.SecurityUtils;
 import com.linkly.user.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -62,5 +64,18 @@ public class AuthService {
 		String token = jwtTokenProvider.generateToken(appUser.getId(), appUser.getEmail());
 
 		return new LoginResponse(token, appUser.getId(), appUser.getEmail(), appUser.getName());
+	}
+
+	/**
+	 * 회원 탈퇴 (본인만 가능)
+	 */
+	@Transactional
+	public void withdraw() {
+		Long currentUserId = SecurityUtils.getCurrentUserId();
+
+		AppUser appUser = appUserRepository.findByIdAndDeletedAtIsNull(currentUserId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", currentUserId));
+
+		appUser.softDelete();
 	}
 }

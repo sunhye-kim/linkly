@@ -46,7 +46,7 @@ class UserIntegrationTest {
 	}
 
 	@Test
-	@WithMockCustomUser(userId = 1L)
+	@WithMockCustomUser(userId = 1L, role = "ADMIN")
 	@DisplayName("회원 조회 → 수정 → 삭제 전체 플로우")
 	@Transactional
 	void userFullLifecycle() throws Exception {
