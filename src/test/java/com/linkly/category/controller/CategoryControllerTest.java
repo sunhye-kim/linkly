@@ -54,8 +54,7 @@ class CategoryControllerTest {
 	@DisplayName("POST /categories - 카테고리 생성 성공")
 	void createCategory_Success() throws Exception {
 		// given
-		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").description("개발 관련 북마크")
-				.build();
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").description("개발 관련 북마크").build();
 
 		CategoryResponse response = CategoryResponse.builder().id(1L).userId(1L).name("개발").description("개발 관련 북마크")
 				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
@@ -137,10 +136,9 @@ class CategoryControllerTest {
 		given(categoryService.getCategoriesByUserId(userId)).willReturn(responses);
 
 		// when & then
-		mockMvc.perform(get("/categories")).andDo(print())
-				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.data", hasSize(2))).andExpect(jsonPath("$.data[0].name").value("개발"))
-				.andExpect(jsonPath("$.data[1].name").value("디자인"));
+		mockMvc.perform(get("/categories")).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data", hasSize(2)))
+				.andExpect(jsonPath("$.data[0].name").value("개발")).andExpect(jsonPath("$.data[1].name").value("디자인"));
 
 		then(categoryService).should(times(1)).getCategoriesByUserId(userId);
 	}
@@ -161,10 +159,9 @@ class CategoryControllerTest {
 				.willReturn(response);
 
 		// when & then
-		mockMvc.perform(put("/categories/{id}", categoryId)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
-				.andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.data.name").value("프로그래밍"));
+		mockMvc.perform(put("/categories/{id}", categoryId).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.name").value("프로그래밍"));
 
 		then(categoryService).should(times(1)).updateCategory(eq(categoryId), eq(userId),
 				any(UpdateCategoryRequest.class));
@@ -183,9 +180,9 @@ class CategoryControllerTest {
 				.willThrow(new InvalidRequestException("해당 카테고리를 수정할 권한이 없습니다", "categoryId=" + categoryId));
 
 		// when & then
-		mockMvc.perform(put("/categories/{id}", categoryId)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
-				.andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+		mockMvc.perform(put("/categories/{id}", categoryId).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("해당 카테고리를 수정할 권한이 없습니다"));
 	}
 
@@ -198,8 +195,7 @@ class CategoryControllerTest {
 		Long userId = 1L;
 
 		// when & then
-		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print())
-				.andExpect(status().isNoContent());
+		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isNoContent());
 
 		then(categoryService).should(times(1)).deleteCategory(categoryId, userId);
 	}
@@ -217,7 +213,6 @@ class CategoryControllerTest {
 				.when(categoryService).deleteCategory(categoryId, userId);
 
 		// when & then
-		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print())
-				.andExpect(status().isBadRequest());
+		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isBadRequest());
 	}
 }

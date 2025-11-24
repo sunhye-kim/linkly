@@ -45,8 +45,7 @@ class CategoryServiceImplTest {
 	void createCategory_Success() {
 		// given
 		Long userId = 1L;
-		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발")
-				.description("개발 관련 북마크").build();
+		CreateCategoryRequest request = CreateCategoryRequest.builder().name("개발").description("개발 관련 북마크").build();
 
 		AppUser user = AppUser.builder().id(userId).email("test@example.com").password("password123").name("테스트")
 				.build();

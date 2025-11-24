@@ -1,7 +1,6 @@
 package com.linkly.user;
 
 import com.linkly.global.dto.ApiResponse;
-import com.linkly.user.dto.CreateUserRequest;
 import com.linkly.user.dto.UpdateUserRequest;
 import com.linkly.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +13,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,18 +24,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
 	private final UserService userService;
-
-	@PostMapping
-	@Operation(summary = "회원 가입", description = "새로운 회원을 등록합니다. 이메일은 중복될 수 없습니다.")
-	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원 가입 성공"),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검증 실패 등)")})
-	public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
-		log.info("POST /users - 회원 가입 요청: email={}", request.getEmail());
-
-		UserResponse response = userService.createUser(request);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
-	}
 
 	@GetMapping("/{id}")
 	@Operation(summary = "회원 조회", description = "회원 ID로 회원 정보를 조회합니다.")

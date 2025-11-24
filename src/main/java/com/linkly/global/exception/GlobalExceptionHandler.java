@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +35,13 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Void>> handleInvalidRequestException(InvalidRequestException e) {
 		log.warn("Invalid request: {}", e.getMessage());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage(), e.getDetails()));
+	}
+
+	/** 인증 실패 (로그인 실패) */
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(BadCredentialsException e) {
+		log.warn("Authentication failed: {}", e.getMessage());
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(e.getMessage()));
 	}
 
 	/** Validation 예외 처리 (@Valid 실패) */

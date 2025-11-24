@@ -1,9 +1,7 @@
 package com.linkly.user;
 
 import com.linkly.domain.AppUser;
-import com.linkly.global.exception.InvalidRequestException;
 import com.linkly.global.exception.ResourceNotFoundException;
-import com.linkly.user.dto.CreateUserRequest;
 import com.linkly.user.dto.UpdateUserRequest;
 import com.linkly.user.dto.UserResponse;
 import java.util.List;
@@ -20,27 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
 	private final AppUserRepository userRepository;
-
-	@Override
-	@Transactional
-	public UserResponse createUser(CreateUserRequest request) {
-		log.info("회원 가입 시도: email={}", request.getEmail());
-
-		// 이메일 중복 체크
-		if (userRepository.existsByEmail(request.getEmail())) {
-			throw new InvalidRequestException("이미 사용 중인 이메일입니다", "email=" + request.getEmail());
-		}
-
-		// TODO: 비밀번호 암호화 (BCryptPasswordEncoder 사용)
-		// 현재는 평문으로 저장 - Spring Security 도입 시 개선 필요
-		AppUser user = AppUser.builder().email(request.getEmail()).password(request.getPassword())
-				.name(request.getName()).build();
-
-		AppUser savedUser = userRepository.save(user);
-		log.info("회원 가입 완료: userId={}, email={}", savedUser.getId(), savedUser.getEmail());
-
-		return UserResponse.from(savedUser);
-	}
 
 	@Override
 	public UserResponse getUserById(Long userId) {

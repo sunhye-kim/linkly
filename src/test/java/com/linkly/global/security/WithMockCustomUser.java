@@ -8,12 +8,13 @@ import org.springframework.security.test.context.support.WithSecurityContext;
  * 테스트에서 인증된 사용자를 모킹하기 위한 커스텀 어노테이션
  *
  * 사용 예시:
+ *
  * <pre>
  * {@code
- * @Test
+ * &#64;Test
  * @WithMockCustomUser(userId = 1L, email = "test@example.com")
  * void testMethod() {
- *     // SecurityUtils.getCurrentUserId()가 1L을 반환
+ * 	// SecurityUtils.getCurrentUserId()가 1L을 반환
  * }
  * }
  * </pre>

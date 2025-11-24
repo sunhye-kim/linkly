@@ -11,11 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.linkly.global.exception.InvalidRequestException;
 import com.linkly.global.exception.ResourceNotFoundException;
 import com.linkly.user.UserController;
 import com.linkly.user.UserService;
-import com.linkly.user.dto.CreateUserRequest;
 import com.linkly.user.dto.UpdateUserRequest;
 import com.linkly.user.dto.UserResponse;
 import java.time.LocalDateTime;
@@ -53,58 +51,6 @@ class UserControllerTest {
 
 	@MockitoBean
 	private com.linkly.auth.CustomUserDetailsService customUserDetailsService;
-
-	@Test
-	@DisplayName("POST /users - 회원 가입 성공")
-	void createUser_Success() throws Exception {
-		// given
-		CreateUserRequest request = CreateUserRequest.builder().email("test@example.com").password("password123")
-				.name("테스트 사용자").build();
-
-		UserResponse response = UserResponse.builder().id(1L).email("test@example.com").name("테스트 사용자")
-				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
-
-		given(userService.createUser(any(CreateUserRequest.class))).willReturn(response);
-
-		// when & then
-		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.id").value(1L))
-				.andExpect(jsonPath("$.data.email").value("test@example.com"))
-				.andExpect(jsonPath("$.data.name").value("테스트 사용자"));
-
-		then(userService).should(times(1)).createUser(any(CreateUserRequest.class));
-	}
-
-	@Test
-	@DisplayName("POST /users - 유효성 검증 실패 (이메일 형식 오류)")
-	void createUser_InvalidEmail() throws Exception {
-		// given
-		CreateUserRequest request = CreateUserRequest.builder().email("invalid-email") // 잘못된 이메일 형식
-				.password("password123").name("테스트 사용자").build();
-
-		// when & then
-		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.success").value(false));
-	}
-
-	@Test
-	@DisplayName("POST /users - 이메일 중복")
-	void createUser_DuplicateEmail() throws Exception {
-		// given
-		CreateUserRequest request = CreateUserRequest.builder().email("duplicate@example.com").password("password123")
-				.name("테스트 사용자").build();
-
-		given(userService.createUser(any(CreateUserRequest.class)))
-				.willThrow(new InvalidRequestException("이미 사용 중인 이메일입니다", "email=" + request.getEmail()));
-
-		// when & then
-		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.success").value(false))
-				.andExpect(jsonPath("$.error.message").value("이미 사용 중인 이메일입니다"));
-	}
 
 	@Test
 	@DisplayName("GET /users/{id} - 회원 조회 성공")

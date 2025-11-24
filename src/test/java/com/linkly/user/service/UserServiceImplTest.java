@@ -2,17 +2,14 @@ package com.linkly.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 import com.linkly.domain.AppUser;
-import com.linkly.global.exception.InvalidRequestException;
 import com.linkly.global.exception.ResourceNotFoundException;
 import com.linkly.user.AppUserRepository;
 import com.linkly.user.UserServiceImpl;
-import com.linkly.user.dto.CreateUserRequest;
 import com.linkly.user.dto.UpdateUserRequest;
 import com.linkly.user.dto.UserResponse;
 import java.util.Arrays;
@@ -39,48 +36,6 @@ class UserServiceImplTest {
 
 	@InjectMocks
 	private UserServiceImpl userService;
-
-	@Test
-	@DisplayName("회원 가입 성공")
-	void createUser_Success() {
-		// given
-		CreateUserRequest request = CreateUserRequest.builder().email("test@example.com").password("password123")
-				.name("테스트 사용자").build();
-
-		AppUser savedUser = AppUser.builder().id(1L).email("test@example.com").password("password123").name("테스트 사용자")
-				.build();
-
-		given(userRepository.existsByEmail("test@example.com")).willReturn(false);
-		given(userRepository.save(any(AppUser.class))).willReturn(savedUser);
-
-		// when
-		UserResponse response = userService.createUser(request);
-
-		// then
-		assertThat(response.getId()).isEqualTo(1L);
-		assertThat(response.getEmail()).isEqualTo("test@example.com");
-		assertThat(response.getName()).isEqualTo("테스트 사용자");
-
-		then(userRepository).should(times(1)).existsByEmail("test@example.com");
-		then(userRepository).should(times(1)).save(any(AppUser.class));
-	}
-
-	@Test
-	@DisplayName("회원 가입 실패 - 이메일 중복")
-	void createUser_DuplicateEmail() {
-		// given
-		CreateUserRequest request = CreateUserRequest.builder().email("duplicate@example.com").password("password123")
-				.name("테스트 사용자").build();
-
-		given(userRepository.existsByEmail("duplicate@example.com")).willReturn(true);
-
-		// when & then
-		assertThatThrownBy(() -> userService.createUser(request)).isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("이미 사용 중인 이메일입니다");
-
-		then(userRepository).should(times(1)).existsByEmail("duplicate@example.com");
-		then(userRepository).should(never()).save(any(AppUser.class));
-	}
 
 	@Test
 	@DisplayName("회원 ID로 조회 성공")

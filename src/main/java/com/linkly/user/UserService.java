@@ -1,21 +1,11 @@
 package com.linkly.user;
 
-import com.linkly.user.dto.CreateUserRequest;
 import com.linkly.user.dto.UpdateUserRequest;
 import com.linkly.user.dto.UserResponse;
 import java.util.List;
 
 /** 회원 관리 서비스 인터페이스 */
 public interface UserService {
-
-	/**
-	 * 회원 가입
-	 *
-	 * @param request
-	 *            회원 가입 정보
-	 * @return 생성된 회원 정보
-	 */
-	UserResponse createUser(CreateUserRequest request);
 
 	/**
 	 * 회원 ID로 조회

@@ -50,8 +50,7 @@ class CategoryIntegrationTest {
 		testUser = userRepository.save(testUser);
 
 		// 저장된 testUser로 SecurityContext 설정
-		org.springframework.security.authentication.UsernamePasswordAuthenticationToken authentication =
-			new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+		org.springframework.security.authentication.UsernamePasswordAuthenticationToken authentication = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
 				testUser, null, java.util.Collections.emptyList());
 		org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
@@ -68,12 +67,11 @@ class CategoryIntegrationTest {
 	@Transactional
 	void categoryFullLifecycle() throws Exception {
 		// 1. 카테고리 생성
-		CreateCategoryRequest createRequest = CreateCategoryRequest.builder().name("개발")
-				.description("개발 관련 북마크").build();
+		CreateCategoryRequest createRequest = CreateCategoryRequest.builder().name("개발").description("개발 관련 북마크")
+				.build();
 
 		String createResponse = mockMvc
-				.perform(post("/categories")
-						.contentType(MediaType.APPLICATION_JSON)
+				.perform(post("/categories").contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(createRequest)))
 				.andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.data.name").value("개발")).andReturn().getResponse().getContentAsString();
@@ -89,18 +87,16 @@ class CategoryIntegrationTest {
 		UpdateCategoryRequest updateRequest = UpdateCategoryRequest.builder().name("프로그래밍").description("프로그래밍 관련 북마크")
 				.build();
 
-		mockMvc.perform(put("/categories/{id}", categoryId)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(updateRequest)))
-				.andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.data.name").value("프로그래밍"));
+		mockMvc.perform(put("/categories/{id}", categoryId).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updateRequest))).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.name").value("프로그래밍"));
 
 		// 4. 수정 확인
 		mockMvc.perform(get("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.name").value("프로그래밍"));
 
 		// 5. 카테고리 삭제
-		mockMvc.perform(delete("/categories/{id}", categoryId))
-				.andDo(print()).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isNoContent());
 
 		// 6. 삭제 확인 (조회 시 404)
 		mockMvc.perform(get("/categories/{id}", categoryId)).andDo(print()).andExpect(status().isNotFound());
@@ -118,15 +114,13 @@ class CategoryIntegrationTest {
 		// given - 첫 번째 카테고리 생성
 		CreateCategoryRequest request1 = CreateCategoryRequest.builder().name("개발").build();
 
-		mockMvc.perform(post("/categories")
-				.contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/categories").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request1))).andExpect(status().isCreated());
 
 		// when & then - 같은 이름으로 두 번째 카테고리 생성 시도
 		CreateCategoryRequest request2 = CreateCategoryRequest.builder().name("개발").build();
 
-		mockMvc.perform(post("/categories")
-				.contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/categories").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request2))).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("이미 사용 중인 카테고리 이름입니다"));
@@ -137,9 +131,8 @@ class CategoryIntegrationTest {
 	@Transactional
 	void differentUsersSameCategoryName() throws Exception {
 		// given - 두 번째 사용자 생성
-		final AppUser anotherUser = userRepository.save(
-				AppUser.builder().email("another@example.com").password("password123").name("다른 사용자").build()
-		);
+		final AppUser anotherUser = userRepository
+				.save(AppUser.builder().email("another@example.com").password("password123").name("다른 사용자").build());
 
 		// when - 두 사용자가 같은 이름의 카테고리 생성
 		CreateCategoryRequest request1 = CreateCategoryRequest.builder().name("개발").build();
@@ -147,18 +140,20 @@ class CategoryIntegrationTest {
 
 		// then - 둘 다 성공
 		mockMvc.perform(post("/categories")
-				.with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(
-					new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-							testUser, null, java.util.Collections.emptyList())))
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request1))).andExpect(status().isCreated());
+				.with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+						.authentication(
+								new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+										testUser, null, java.util.Collections.emptyList())))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request1)))
+				.andExpect(status().isCreated());
 
 		mockMvc.perform(post("/categories")
-				.with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication(
-					new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-							anotherUser, null, java.util.Collections.emptyList())))
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request2))).andExpect(status().isCreated());
+				.with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+						.authentication(
+								new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+										anotherUser, null, java.util.Collections.emptyList())))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request2)))
+				.andExpect(status().isCreated());
 	}
 
 	@Test
@@ -178,10 +173,9 @@ class CategoryIntegrationTest {
 		categoryRepository.save(category3);
 
 		// when & then - 조회 시 삭제되지 않은 2개만 조회
-		mockMvc.perform(get("/categories")).andDo(print())
-				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.data", hasSize(2))).andExpect(jsonPath("$.data[0].name").exists())
-				.andExpect(jsonPath("$.data[1].name").exists());
+		mockMvc.perform(get("/categories")).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data", hasSize(2)))
+				.andExpect(jsonPath("$.data[0].name").exists()).andExpect(jsonPath("$.data[1].name").exists());
 	}
 
 	@Test
@@ -198,9 +192,9 @@ class CategoryIntegrationTest {
 		UpdateCategoryRequest request = UpdateCategoryRequest.builder().name("수정 시도").build();
 
 		// when & then - 다른 사용자(testUser)가 수정 시도하면 실패
-		mockMvc.perform(put("/categories/{id}", category.getId())
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
-				.andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+		mockMvc.perform(put("/categories/{id}", category.getId()).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("해당 카테고리를 수정할 권한이 없습니다"));
 	}
 
@@ -217,8 +211,8 @@ class CategoryIntegrationTest {
 		category = categoryRepository.save(category);
 
 		// when & then - 다른 사용자(testUser)가 삭제 시도하면 실패
-		mockMvc.perform(delete("/categories/{id}", category.getId()))
-				.andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+		mockMvc.perform(delete("/categories/{id}", category.getId())).andDo(print()).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.error.message").value("해당 카테고리를 삭제할 권한이 없습니다"));
 	}
 
@@ -232,8 +226,7 @@ class CategoryIntegrationTest {
 		CreateCategoryRequest request = CreateCategoryRequest.builder().name(longName).build();
 
 		// when & then
-		mockMvc.perform(post("/categories")
-				.contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/categories").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.success").value(false));
 	}
