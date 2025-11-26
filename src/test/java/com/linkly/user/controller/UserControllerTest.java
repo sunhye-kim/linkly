@@ -57,8 +57,7 @@ class UserControllerTest {
 	void getUserById_Success() throws Exception {
 		// given
 		Long userId = 1L;
-		UserResponse response = UserResponse.builder().id(userId).email("test@example.com").name("테스트 사용자")
-				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+		UserResponse response = createUserResponse(userId, "test@example.com", "테스트 사용자");
 
 		given(userService.getUserById(userId)).willReturn(response);
 
@@ -86,11 +85,8 @@ class UserControllerTest {
 	@DisplayName("GET /users - 전체 회원 조회")
 	void getAllUsers() throws Exception {
 		// given
-		UserResponse user1 = UserResponse.builder().id(1L).email("user1@example.com").name("사용자1")
-				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
-
-		UserResponse user2 = UserResponse.builder().id(2L).email("user2@example.com").name("사용자2")
-				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+		UserResponse user1 = createUserResponse(1L, "user1@example.com", "사용자1");
+		UserResponse user2 = createUserResponse(2L, "user2@example.com", "사용자2");
 
 		List<UserResponse> responses = Arrays.asList(user1, user2);
 		given(userService.getAllUsers()).willReturn(responses);
@@ -109,8 +105,7 @@ class UserControllerTest {
 	void getUserByEmail() throws Exception {
 		// given
 		String email = "test@example.com";
-		UserResponse response = UserResponse.builder().id(1L).email(email).name("테스트 사용자")
-				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+		UserResponse response = createUserResponse(1L, email, "테스트 사용자");
 
 		given(userService.getUserByEmail(email)).willReturn(response);
 
@@ -128,8 +123,7 @@ class UserControllerTest {
 		Long userId = 1L;
 		UpdateUserRequest request = UpdateUserRequest.builder().name("수정된 이름").build();
 
-		UserResponse response = UserResponse.builder().id(userId).email("test@example.com").name("수정된 이름")
-				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+		UserResponse response = createUserResponse(userId, "test@example.com", "수정된 이름");
 
 		given(userService.updateUser(eq(userId), any(UpdateUserRequest.class))).willReturn(response);
 
@@ -162,5 +156,9 @@ class UserControllerTest {
 
 		// when & then
 		mockMvc.perform(get("/users/{id}", userId)).andDo(print()).andExpect(status().isNotFound());
+	}
+	private UserResponse createUserResponse(Long id, String email, String name) {
+		LocalDateTime now = LocalDateTime.now();
+		return new UserResponse(id, email, name, null, now, now);
 	}
 }
