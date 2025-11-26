@@ -2,6 +2,7 @@ package com.linkly.user;
 
 import com.linkly.global.dto.ApiResponse;
 import com.linkly.user.dto.UpdateUserRequest;
+import com.linkly.user.dto.UpdateUserRoleRequest;
 import com.linkly.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -67,6 +68,23 @@ public class UserController {
 		log.info("PUT /users/{} - 회원 정보 수정", id);
 
 		UserResponse response = userService.updateUser(id, request);
+
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
+
+	@PatchMapping("/{id}/role")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "회원 권한 변경 (관리자 전용)", description = "관리자가 특정 회원의 권한을 변경합니다. USER 또는 ADMIN으로 변경할 수 있습니다.")
+	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "권한 변경 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음 (관리자만 가능)"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "유효성 검증 실패")})
+	public ResponseEntity<ApiResponse<UserResponse>> updateUserRole(
+			@Parameter(description = "회원 ID", example = "1") @PathVariable Long id,
+			@Valid @RequestBody UpdateUserRoleRequest request) {
+		log.info("PATCH /users/{}/role - 회원 권한 변경: {}", id, request.getRole());
+
+		UserResponse response = userService.updateUserRole(id, request.getRole());
 
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}

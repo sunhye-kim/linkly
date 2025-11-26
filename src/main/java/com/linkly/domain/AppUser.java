@@ -47,6 +47,10 @@ public class AppUser extends BaseTimeEntity {
 		}
 	}
 
+	public void updateRole(UserRole role) {
+		this.role = role;
+	}
+
 	// 소프트 삭제 관련 메서드
 	public void softDelete() {
 		this.deletedAt = LocalDateTime.now();

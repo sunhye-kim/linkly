@@ -50,4 +50,15 @@ public interface UserService {
 	 *            회원 ID
 	 */
 	void deleteUser(Long userId);
+
+	/**
+	 * 회원 권한 변경 (관리자 전용)
+	 *
+	 * @param userId
+	 *            회원 ID
+	 * @param role
+	 *            변경할 권한
+	 * @return 수정된 회원 정보
+	 */
+	UserResponse updateUserRole(Long userId, com.linkly.domain.enums.UserRole role);
 }

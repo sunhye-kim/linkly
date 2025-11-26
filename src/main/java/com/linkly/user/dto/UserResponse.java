@@ -1,6 +1,7 @@
 package com.linkly.user.dto;
 
 import com.linkly.domain.AppUser;
+import com.linkly.domain.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,9 @@ public class UserResponse {
 	@Schema(description = "이름", example = "홍길동")
 	private String name;
 
+	@Schema(description = "권한", example = "USER", allowableValues = {"USER", "ADMIN"})
+	private UserRole role;
+
 	@Schema(description = "생성일시")
 	private LocalDateTime createdAt;
 
@@ -30,7 +34,7 @@ public class UserResponse {
 
 	/** Entity를 DTO로 변환 */
 	public static UserResponse from(AppUser user) {
-		return UserResponse.builder().id(user.getId()).email(user.getEmail()).name(user.getName())
+		return UserResponse.builder().id(user.getId()).email(user.getEmail()).name(user.getName()).role(user.getRole())
 				.createdAt(user.getCreatedAt()).updatedAt(user.getUpdatedAt()).build();
 	}
 }

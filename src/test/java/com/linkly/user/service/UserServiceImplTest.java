@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 import com.linkly.domain.AppUser;
+import com.linkly.domain.enums.UserRole;
 import com.linkly.global.exception.ResourceNotFoundException;
 import com.linkly.user.AppUserRepository;
 import com.linkly.user.UserServiceImpl;
@@ -180,6 +181,40 @@ class UserServiceImplTest {
 
 		// when & then
 		assertThatThrownBy(() -> userService.deleteUser(userId)).isInstanceOf(ResourceNotFoundException.class);
+
+		then(userRepository).should(times(1)).findByIdAndDeletedAtIsNull(userId);
+	}
+
+	@Test
+	@DisplayName("회원 권한 변경 성공 - USER -> ADMIN")
+	void updateUserRole_Success() {
+		// given
+		Long userId = 1L;
+		AppUser user = AppUser.builder().id(userId).email("test@example.com").password("password123").name("테스트 사용자")
+				.role(UserRole.USER).build();
+
+		given(userRepository.findByIdAndDeletedAtIsNull(userId)).willReturn(Optional.of(user));
+
+		// when
+		UserResponse response = userService.updateUserRole(userId, UserRole.ADMIN);
+
+		// then
+		assertThat(response.getRole()).isEqualTo(UserRole.ADMIN);
+		assertThat(user.getRole()).isEqualTo(UserRole.ADMIN);
+
+		then(userRepository).should(times(1)).findByIdAndDeletedAtIsNull(userId);
+	}
+
+	@Test
+	@DisplayName("회원 권한 변경 실패 - 존재하지 않는 회원")
+	void updateUserRole_NotFound() {
+		// given
+		Long userId = 999L;
+		given(userRepository.findByIdAndDeletedAtIsNull(userId)).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userService.updateUserRole(userId, UserRole.ADMIN))
+				.isInstanceOf(ResourceNotFoundException.class);
 
 		then(userRepository).should(times(1)).findByIdAndDeletedAtIsNull(userId);
 	}

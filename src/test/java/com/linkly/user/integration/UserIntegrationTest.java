@@ -8,9 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkly.domain.AppUser;
+import com.linkly.domain.enums.UserRole;
 import com.linkly.global.security.WithMockCustomUser;
 import com.linkly.user.AppUserRepository;
 import com.linkly.user.dto.UpdateUserRequest;
+import com.linkly.user.dto.UpdateUserRoleRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -131,5 +133,58 @@ class UserIntegrationTest {
 		// when & then
 		mockMvc.perform(get("/users").param("email", "notfound@example.com")).andDo(print())
 				.andExpect(status().isNotFound()).andExpect(jsonPath("$.success").value(false));
+	}
+
+	@Test
+	@WithMockCustomUser(userId = 1L, role = "ADMIN")
+	@DisplayName("회원 권한 변경 성공 (관리자 전용)")
+	@Transactional
+	void updateUserRole_Success() throws Exception {
+		// given - 테스트 사용자 생성
+		AppUser user = AppUser.builder().email("user@example.com").password("password123").name("일반 사용자")
+				.role(UserRole.USER).build();
+		AppUser savedUser = userRepository.save(user);
+
+		UpdateUserRoleRequest request = new UpdateUserRoleRequest(UserRole.ADMIN);
+
+		// when & then - 권한 변경
+		mockMvc.perform(patch("/users/{id}/role", savedUser.getId()).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.role").value("ADMIN"));
+
+		// DB 확인 - 권한이 변경되었는지 확인
+		AppUser updatedUser = userRepository.findById(savedUser.getId()).orElseThrow();
+		assertThat(updatedUser.getRole()).isEqualTo(UserRole.ADMIN);
+	}
+
+	@Test
+	@WithMockCustomUser(userId = 1L, role = "USER")
+	@DisplayName("회원 권한 변경 실패 - 일반 사용자는 권한 변경 불가")
+	@Transactional
+	void updateUserRole_Forbidden() throws Exception {
+		// given - 테스트 사용자 생성
+		AppUser user = AppUser.builder().email("user@example.com").password("password123").name("일반 사용자")
+				.role(UserRole.USER).build();
+		AppUser savedUser = userRepository.save(user);
+
+		UpdateUserRoleRequest request = new UpdateUserRoleRequest(UserRole.ADMIN);
+
+		// when & then - 권한 없음 (403)
+		mockMvc.perform(patch("/users/{id}/role", savedUser.getId()).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockCustomUser(userId = 1L, role = "ADMIN")
+	@DisplayName("회원 권한 변경 실패 - 존재하지 않는 회원")
+	@Transactional
+	void updateUserRole_NotFound() throws Exception {
+		// given
+		UpdateUserRoleRequest request = new UpdateUserRoleRequest(UserRole.ADMIN);
+
+		// when & then
+		mockMvc.perform(patch("/users/{id}/role", 999L).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andDo(print()).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.success").value(false));
 	}
 }

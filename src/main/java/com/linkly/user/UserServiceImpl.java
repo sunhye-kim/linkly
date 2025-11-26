@@ -75,4 +75,19 @@ public class UserServiceImpl implements UserService {
 
 		log.info("회원 삭제 완료: userId={}", userId);
 	}
+
+	@Override
+	@Transactional
+	public UserResponse updateUserRole(Long userId, com.linkly.domain.enums.UserRole role) {
+		log.info("회원 권한 변경: userId={}, role={}", userId, role);
+
+		AppUser user = userRepository.findByIdAndDeletedAtIsNull(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+		user.updateRole(role);
+
+		log.info("회원 권한 변경 완료: userId={}, role={}", userId, role);
+
+		return UserResponse.from(user);
+	}
 }
