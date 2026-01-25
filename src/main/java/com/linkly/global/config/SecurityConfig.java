@@ -39,7 +39,9 @@ public class SecurityConfig {
 						// 공개 엔드포인트 (인증 불필요)
 						.requestMatchers("/auth/**", // 로그인, 회원가입
 								"/health", // 헬스체크
+								"/swagger-ui.html", // Swagger UI (구버전 경로)
 								"/swagger-ui/**", // Swagger UI
+								"/v3/api-docs", // OpenAPI 문서 (루트)
 								"/v3/api-docs/**", // OpenAPI 문서
 								"/swagger-resources/**", "/webjars/**")
 						.permitAll()
