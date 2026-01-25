@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { bookmarkApi } from '../api/bookmarkApi';
+import CategoryModal from './CategoryModal';
 
-function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [] }) {
+function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCategoryCreated }) {
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -11,6 +12,7 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [] }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const isEditMode = !!bookmark;
 
@@ -31,6 +33,16 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [] }) {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleCategoryCreated = (newCategory) => {
+    if (onCategoryCreated) {
+      onCategoryCreated(newCategory);
+    }
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: newCategory.id,
     }));
   };
 
@@ -116,19 +128,28 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [] }) {
 
         <div className="form-group">
           <label htmlFor="categoryId">카테고리 (선택)</label>
-          <select
-            id="categoryId"
-            name="categoryId"
-            value={formData.categoryId}
-            onChange={handleChange}
-          >
-            <option value="">카테고리 없음</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div className="category-select-wrapper">
+            <select
+              id="categoryId"
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleChange}
+            >
+              <option value="">카테고리 없음</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="add-category-btn"
+              onClick={() => setShowCategoryModal(true)}
+            >
+              + 새 카테고리
+            </button>
+          </div>
         </div>
 
         <div className="form-group">
@@ -152,6 +173,13 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [] }) {
           </button>
         </div>
       </form>
+
+      {showCategoryModal && (
+        <CategoryModal
+          onClose={() => setShowCategoryModal(false)}
+          onCategoryCreated={handleCategoryCreated}
+        />
+      )}
     </div>
   );
 }

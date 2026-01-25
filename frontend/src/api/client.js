@@ -28,12 +28,22 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
+    // 에러 메시지 추출: error.response.data.error.message 또는 error.response.data.message
+    const errorMessage =
+      error.response?.data?.error?.message ||
+      error.response?.data?.message ||
+      error.message ||
+      '알 수 없는 오류가 발생했습니다.';
+
+    // error.message에 서버 에러 메시지 할당
+    error.message = errorMessage;
+
     if (error.response) {
-      console.error('API Error:', error.response.data);
+      console.error('API Error:', errorMessage);
     } else if (error.request) {
-      console.error('Network Error:', error.message);
+      console.error('Network Error:', errorMessage);
     } else {
-      console.error('Error:', error.message);
+      console.error('Error:', errorMessage);
     }
     return Promise.reject(error);
   }

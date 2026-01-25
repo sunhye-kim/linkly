@@ -48,6 +48,10 @@ function BookmarksPage() {
     setSelectedCategoryId(categoryId);
   };
 
+  const handleCategoryCreated = (newCategory) => {
+    setCategories((prev) => [...prev, newCategory]);
+  };
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -85,6 +89,7 @@ function BookmarksPage() {
           onSuccess={handleSuccess}
           onCancel={handleCancel}
           categories={categories}
+          onCategoryCreated={handleCategoryCreated}
         />
       ) : (
         <BookmarkList
