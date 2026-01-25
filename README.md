@@ -17,6 +17,78 @@
 - Vite
 - JavaScript/JSX
 
+## 🚀 빠른 시작 (Quick Start)
+
+### 사전 요구사항
+- Docker & Docker Compose
+- Node.js & npm
+
+### 1. 환경 변수 설정
+
+`.env.example` 파일을 복사하여 `.env` 파일 생성:
+
+```bash
+cp .env.example .env
+```
+
+필요시 `.env` 파일에서 데이터베이스 비밀번호 변경:
+```env
+MYSQL_ROOT_PASSWORD=your_password
+DB_PASSWORD=your_password
+```
+
+### 2. 프론트엔드 의존성 설치
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 3. Docker로 서비스 실행
+
+```bash
+docker compose up -d --build
+```
+
+### 4. 실행 확인
+
+```bash
+# 컨테이너 상태 확인
+docker compose ps
+
+# 로그 확인
+docker compose logs -f app
+```
+
+### 접속 정보
+
+- **백엔드 API**: http://localhost:8080
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **프론트엔드 개발 서버**:
+  ```bash
+  cd frontend
+  npm run dev
+  # http://localhost:3000
+  ```
+- **MySQL**: localhost:3306 (root/{설정한 비밀번호})
+
+### Docker 관리 명령어
+
+```bash
+# 서비스 시작
+docker compose up -d
+
+# 서비스 중지
+docker compose down
+
+# 서비스 중지 + 볼륨 삭제 (데이터베이스 초기화)
+docker compose down -v
+
+# 로그 확인
+docker compose logs -f app
+```
+
 ## 프로젝트 구조
 
 ```
@@ -121,29 +193,6 @@ java -jar build/libs/Linkly-0.0.1-SNAPSHOT.jar
 ```
 
 단일 JAR 파일로 프론트+백엔드 모두 실행: http://localhost:8080
-
-## API 엔드포인트
-
-### 사용자 (User)
-- `POST /api/users` - 회원 가입
-- `GET /api/users/{id}` - 사용자 조회
-- `GET /api/users` - 전체 사용자 조회
-- `PUT /api/users/{id}` - 사용자 정보 수정
-- `DELETE /api/users/{id}` - 사용자 삭제
-
-### 카테고리 (Category)
-- `POST /api/categories` - 카테고리 생성
-- `GET /api/categories/{id}` - 카테고리 조회
-- `GET /api/categories/user/{userId}` - 사용자별 카테고리 조회
-- `PUT /api/categories/{id}` - 카테고리 수정
-- `DELETE /api/categories/{id}` - 카테고리 삭제
-
-### 북마크 (Bookmark)
-- `POST /api/bookmarks` - 북마크 생성
-- `GET /api/bookmarks/{id}` - 북마크 조회
-- `GET /api/bookmarks/user/{userId}` - 사용자별 북마크 조회
-- `PUT /api/bookmarks/{id}` - 북마크 수정
-- `DELETE /api/bookmarks/{id}` - 북마크 삭제
 
 ## 데이터베이스 설정
 
