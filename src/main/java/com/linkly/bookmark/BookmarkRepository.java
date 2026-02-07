@@ -37,4 +37,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
 	/** 사용자 ID와 삭제되지 않은 북마크 조회 */
 	List<Bookmark> findAllByAppUserIdAndDeletedAtIsNull(Long userId);
+
+	/** 삭제되지 않은 전체 북마크 조회 (헬스체크 스케줄러용) */
+	List<Bookmark> findAllByDeletedAtIsNull();
 }

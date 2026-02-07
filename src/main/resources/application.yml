@@ -10,6 +10,12 @@ jwt:
   secret: ${JWT_SECRET:your-secret-key-should-be-at-least-256-bits-for-HS256-algorithm-please-change-this-in-production}
   expiration: ${JWT_EXPIRATION:86400000} # 24시간 (밀리초)
 
+# 헬스체크 스케줄러 설정
+health-check:
+  schedule: "0 0 2 * * *"    # 매일 새벽 2시
+  timeout-seconds: 10          # HTTP 요청 타임아웃(초)
+  thread-pool-size: 10         # 비동기 체크 스레드 풀 최대 크기
+
 # Swagger/OpenAPI 설정
 springdoc:
   api-docs:
