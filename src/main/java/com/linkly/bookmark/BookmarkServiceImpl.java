@@ -174,6 +174,19 @@ public class BookmarkServiceImpl implements BookmarkService {
 		log.info("북마크 삭제 완료: bookmarkId={}", bookmarkId);
 	}
 
+	@Override
+	public List<BookmarkResponse> searchBookmarks(Long userId, String keyword, Long categoryId) {
+		log.debug("북마크 검색: userId={}, keyword={}, categoryId={}", userId, keyword, categoryId);
+
+		if (keyword == null || keyword.isBlank()) {
+			return getBookmarksByUserId(userId);
+		}
+
+		List<Bookmark> bookmarks = bookmarkRepository.searchBookmarks(userId, keyword, categoryId);
+
+		return bookmarks.stream().map(b -> BookmarkResponse.from(b, getTagNames(b))).collect(Collectors.toList());
+	}
+
 	/** 태그 처리: 태그가 없으면 생성, 있으면 재사용 */
 	private List<String> processTags(Bookmark bookmark, AppUser user, List<String> tagNames) {
 		if (tagNames == null || tagNames.isEmpty()) {

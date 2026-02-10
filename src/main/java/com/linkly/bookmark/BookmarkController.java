@@ -70,6 +70,21 @@ public class BookmarkController {
 		return ResponseEntity.ok(ApiResponse.success(responses));
 	}
 
+	@GetMapping("/search")
+	@Operation(summary = "북마크 검색", description = "키워드로 북마크를 검색합니다. 제목·URL·설명·태그를 대상으로 검색하며, 카테고리 필터와 AND 조합이 가능합니다.")
+	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "검색 성공"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")})
+	public ResponseEntity<ApiResponse<List<BookmarkResponse>>> searchBookmarks(
+			@Parameter(description = "검색 키워드", example = "spring") @RequestParam String keyword,
+			@Parameter(description = "카테고리 ID (없으면 전체)") @RequestParam(required = false) Long categoryId) {
+		Long userId = SecurityUtils.getCurrentUserId();
+		log.info("GET /bookmarks/search - 북마크 검색: userId={}, keyword={}, categoryId={}", userId, keyword, categoryId);
+
+		List<BookmarkResponse> responses = bookmarkService.searchBookmarks(userId, keyword, categoryId);
+
+		return ResponseEntity.ok(ApiResponse.success(responses));
+	}
+
 	@PutMapping("/{bookmarkId}")
 	@Operation(summary = "북마크 수정", description = "북마크의 정보를 수정합니다. 태그도 함께 수정할 수 있으며, 태그는 전체 교체됩니다. 북마크 소유자만 수정할 수 있습니다.")
 	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "수정 성공"),

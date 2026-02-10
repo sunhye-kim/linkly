@@ -59,4 +59,17 @@ public interface BookmarkService {
 	 *            사용자 ID (권한 체크용)
 	 */
 	void deleteBookmark(Long bookmarkId, Long userId);
+
+	/**
+	 * 키워드로 북마크 검색 (제목·URL·설명·태그 대상)
+	 *
+	 * @param userId
+	 *            사용자 ID
+	 * @param keyword
+	 *            검색 키워드
+	 * @param categoryId
+	 *            카테고리 ID (null 이면 전체)
+	 * @return 검색된 북마크 목록
+	 */
+	List<BookmarkResponse> searchBookmarks(Long userId, String keyword, Long categoryId);
 }
