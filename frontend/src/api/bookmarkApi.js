@@ -41,4 +41,12 @@ export const bookmarkApi = {
       params: { userId }
     });
   },
+
+  // 키워드로 북마크 검색 (카테고리 필터와 AND 조합 가능)
+  searchBookmarks: async (keyword, categoryId = null) => {
+    const params = { keyword };
+    if (categoryId !== null) params.categoryId = categoryId;
+    const response = await apiClient.get('/bookmarks/search', { params });
+    return response.data.data;
+  },
 };
