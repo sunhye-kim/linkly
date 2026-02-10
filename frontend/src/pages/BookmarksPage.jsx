@@ -9,6 +9,7 @@ function BookmarksPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [keyword, setKeyword] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -64,6 +65,18 @@ function BookmarksPage() {
       </div>
 
       {!showForm && (
+        <div className="search-wrapper">
+          <input
+            type="text"
+            className="search-bar"
+            placeholder="제목, URL, 설명, 태그로 검색..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+        </div>
+      )}
+
+      {!showForm && (
         <div className="category-filter">
           <button
             className={selectedCategoryId === null ? 'filter-btn active' : 'filter-btn'}
@@ -96,6 +109,7 @@ function BookmarksPage() {
           onEdit={handleEdit}
           onRefresh={refreshKey}
           selectedCategoryId={selectedCategoryId}
+          keyword={keyword}
         />
       )}
     </div>

@@ -9,7 +9,7 @@ const STATUS_LABEL = {
   UNKNOWN: '알수없음',
 };
 
-function BookmarkList({ onEdit, onRefresh, selectedCategoryId }) {
+function BookmarkList({ onEdit, onRefresh, selectedCategoryId, keyword }) {
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -31,6 +31,19 @@ function BookmarkList({ onEdit, onRefresh, selectedCategoryId }) {
     }
   };
 
+  const fetchSearchResults = async (kw, catId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await bookmarkApi.searchBookmarks(kw, catId);
+      setBookmarks(data);
+    } catch (err) {
+      setError(err.response?.data?.message || '검색에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchHealthResults = async () => {
     try {
       const results = await linkHealthApi.getMyResults();
@@ -45,15 +58,29 @@ function BookmarkList({ onEdit, onRefresh, selectedCategoryId }) {
     }
   };
 
+  // 헬스체크 결과는 북마크 추가/수정/삭제 시에만 갱신
   useEffect(() => {
-    fetchBookmarks();
     fetchHealthResults();
   }, [onRefresh]);
 
+  // 북마크 목록: keyword가 있으면 300ms debounce 후 서버 검색, 없으면 즉시 전체 목록 조회
+  useEffect(() => {
+    if (!keyword || !keyword.trim()) {
+      fetchBookmarks();
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetchSearchResults(keyword, selectedCategoryId);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keyword, selectedCategoryId, onRefresh]);
+
+  // keyword가 있으면 서버에서 이미 필터링 완료, 없으면 client-side 카테고리 필터 적용
   const filteredBookmarks = useMemo(() => {
+    if (keyword && keyword.trim()) return bookmarks;
     if (selectedCategoryId === null) return bookmarks;
     return bookmarks.filter((b) => b.categoryId === selectedCategoryId);
-  }, [bookmarks, selectedCategoryId]);
+  }, [bookmarks, selectedCategoryId, keyword]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
@@ -90,7 +117,9 @@ function BookmarkList({ onEdit, onRefresh, selectedCategoryId }) {
       <div className="bookmark-grid">
         {filteredBookmarks.length === 0 ? (
           <div className="empty-message">
-            {bookmarks.length === 0
+            {keyword && keyword.trim()
+              ? '검색 결과가 없습니다.'
+              : bookmarks.length === 0
               ? '등록된 북마크가 없습니다.'
               : '해당 카테고리의 북마크가 없습니다.'}
           </div>
