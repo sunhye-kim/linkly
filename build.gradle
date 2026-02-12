@@ -42,6 +42,9 @@ dependencies {
     // Swagger/OpenAPI Documentation
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+    // HTML Parsing (URL 메타데이터 추출)
+    implementation 'org.jsoup:jsoup:1.18.3'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
