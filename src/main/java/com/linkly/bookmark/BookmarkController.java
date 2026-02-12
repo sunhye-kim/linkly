@@ -3,6 +3,7 @@ package com.linkly.bookmark;
 import com.linkly.bookmark.dto.BookmarkResponse;
 import com.linkly.bookmark.dto.CreateBookmarkRequest;
 import com.linkly.bookmark.dto.UpdateBookmarkRequest;
+import com.linkly.bookmark.dto.UrlMetadataResponse;
 import com.linkly.global.dto.ApiResponse;
 import com.linkly.global.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,20 @@ import org.springframework.web.bind.annotation.*;
 public class BookmarkController {
 
 	private final BookmarkService bookmarkService;
+	private final MetadataService metadataService;
+
+	@GetMapping("/metadata")
+	@Operation(summary = "URL 메타데이터 추출", description = "URL에서 제목과 설명을 자동으로 추출합니다. 실패해도 200 OK를 반환하며, 필드가 null일 수 있습니다.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "메타데이터 추출 완료 (실패 시에도 200)")})
+	public ResponseEntity<ApiResponse<UrlMetadataResponse>> getUrlMetadata(
+			@Parameter(description = "메타데이터를 추출할 URL", example = "https://spring.io") @RequestParam String url) {
+		log.info("GET /bookmarks/metadata - URL 메타데이터 추출: url={}", url);
+
+		UrlMetadataResponse response = metadataService.extractMetadata(url);
+
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
 
 	@PostMapping
 	@Operation(summary = "북마크 생성", description = "새로운 북마크를 생성합니다. 태그를 함께 등록할 수 있으며, 같은 URL은 중복 저장할 수 없습니다.")
