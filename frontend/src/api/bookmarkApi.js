@@ -49,4 +49,10 @@ export const bookmarkApi = {
     const response = await apiClient.get('/bookmarks/search', { params });
     return response.data.data;
   },
+
+  // URL 메타데이터 추출 (제목, 설명 자동 채우기)
+  fetchUrlMetadata: async (url) => {
+    const response = await apiClient.get('/bookmarks/metadata', { params: { url } });
+    return response.data.data;
+  },
 };
