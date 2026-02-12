@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { bookmarkApi } from '../api/bookmarkApi';
 import CategoryModal from './CategoryModal';
 
@@ -11,8 +11,10 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
     tags: '',
   });
   const [loading, setLoading] = useState(false);
+  const [metadataLoading, setMetadataLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const metadataTimerRef = useRef(null);
 
   const isEditMode = !!bookmark;
 
@@ -27,6 +29,46 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
       });
     }
   }, [bookmark]);
+
+  // URL 변경 시 메타데이터 자동 추출 (편집 모드 제외)
+  useEffect(() => {
+    if (isEditMode || !formData.url) {
+      return;
+    }
+
+    // URL 형식 간단 검증
+    try {
+      new URL(formData.url);
+    } catch {
+      return;
+    }
+
+    if (metadataTimerRef.current) {
+      clearTimeout(metadataTimerRef.current);
+    }
+
+    metadataTimerRef.current = setTimeout(async () => {
+      setMetadataLoading(true);
+      try {
+        const metadata = await bookmarkApi.fetchUrlMetadata(formData.url);
+        setFormData((prev) => ({
+          ...prev,
+          title: prev.title || metadata.title || '',
+          description: prev.description || metadata.description || '',
+        }));
+      } catch (err) {
+        console.warn('메타데이터 추출 실패:', err);
+      } finally {
+        setMetadataLoading(false);
+      }
+    }, 800);
+
+    return () => {
+      if (metadataTimerRef.current) {
+        clearTimeout(metadataTimerRef.current);
+      }
+    };
+  }, [formData.url, isEditMode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,20 +129,6 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="title">제목 *</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            maxLength={255}
-            placeholder="북마크 제목"
-          />
-        </div>
-
-        <div className="form-group">
           <label htmlFor="url">URL *</label>
           <input
             type="url"
@@ -111,6 +139,23 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
             required
             maxLength={500}
             placeholder="https://example.com"
+          />
+          {metadataLoading && (
+            <div className="metadata-loading">메타데이터 가져오는 중...</div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="title">제목 *</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            maxLength={255}
+            placeholder="북마크 제목"
           />
         </div>
 
