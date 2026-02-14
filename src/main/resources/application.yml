@@ -10,6 +10,12 @@ jwt:
   secret: ${JWT_SECRET:your-secret-key-should-be-at-least-256-bits-for-HS256-algorithm-please-change-this-in-production}
   expiration: ${JWT_EXPIRATION:86400000} # 24시간 (밀리초)
 
+# Ollama 설정
+ollama:
+  base-url: http://localhost:11434
+  model: gemma3:4b
+  timeout: 30
+
 # 헬스체크 스케줄러 설정
 health-check:
   schedule: "0 0 2 * * *"    # 매일 새벽 2시
