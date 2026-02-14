@@ -17,11 +17,15 @@
 - Vite
 - JavaScript/JSX
 
+### AI
+- Ollama + Gemma 3 (4B) — 북마크 카테고리 자동 추천
+
 ## 🚀 빠른 시작 (Quick Start)
 
 ### 사전 요구사항
 - Docker & Docker Compose
 - Node.js & npm
+- Ollama (AI 카테고리 추천 기능 사용 시)
 
 ### 1. 환경 변수 설정
 
@@ -88,6 +92,23 @@ docker compose down -v
 # 로그 확인
 docker compose logs -f app
 ```
+
+### 5. Ollama 설정 (선택)
+
+AI 카테고리 자동 추천 기능을 사용하려면 Ollama를 설치하고 Gemma 3 모델을 다운로드합니다.
+
+```bash
+# Ollama 설치 (macOS)
+brew install ollama
+
+# Ollama 서버 실행
+ollama serve
+
+# Gemma 3 4B 모델 다운로드 (다른 터미널에서)
+ollama pull gemma3:4b
+```
+
+Ollama가 실행되지 않아도 나머지 기능은 정상 동작합니다. 카테고리 추천만 비활성화됩니다.
 
 ## 프로젝트 구조
 
