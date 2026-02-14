@@ -55,4 +55,12 @@ export const bookmarkApi = {
     const response = await apiClient.get('/bookmarks/metadata', { params: { url } });
     return response.data.data;
   },
+
+  // AI 카테고리 추천
+  suggestCategory: async (title, description) => {
+    const response = await apiClient.get('/bookmarks/suggest-category', {
+      params: { title, description },
+    });
+    return response.data.data;
+  },
 };

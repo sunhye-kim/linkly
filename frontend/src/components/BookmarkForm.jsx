@@ -14,6 +14,7 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
   const [metadataLoading, setMetadataLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
   const metadataTimerRef = useRef(null);
 
   const isEditMode = !!bookmark;
@@ -51,11 +52,36 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
       setMetadataLoading(true);
       try {
         const metadata = await bookmarkApi.fetchUrlMetadata(formData.url);
+        const newTitle = formData.title || metadata.title || '';
+        const newDescription = formData.description || metadata.description || '';
         setFormData((prev) => ({
           ...prev,
           title: prev.title || metadata.title || '',
           description: prev.description || metadata.description || '',
         }));
+
+        // AI 카테고리 추천 (카테고리 미선택 & 카테고리 존재 시)
+        if (!formData.categoryId && categories.length > 0 && (newTitle || newDescription)) {
+          try {
+            const suggestion = await bookmarkApi.suggestCategory(newTitle, newDescription);
+            if (suggestion?.suggestedCategory) {
+              const matched = categories.find(
+                (c) => c.name === suggestion.suggestedCategory
+              );
+              if (matched) {
+                setFormData((prev) => {
+                  if (!prev.categoryId) {
+                    setAiSuggestion(suggestion.suggestedCategory);
+                    return { ...prev, categoryId: matched.id };
+                  }
+                  return prev;
+                });
+              }
+            }
+          } catch (err) {
+            console.warn('AI 카테고리 추천 실패:', err);
+          }
+        }
       } catch (err) {
         console.warn('메타데이터 추출 실패:', err);
       } finally {
@@ -68,10 +94,13 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
         clearTimeout(metadataTimerRef.current);
       }
     };
-  }, [formData.url, isEditMode]);
+  }, [formData.url, isEditMode, categories]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'categoryId') {
+      setAiSuggestion(null);
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -195,6 +224,9 @@ function BookmarkForm({ bookmark, onSuccess, onCancel, categories = [], onCatego
               + 새 카테고리
             </button>
           </div>
+          {aiSuggestion && (
+            <div className="ai-suggestion">AI 추천: {aiSuggestion}</div>
+          )}
         </div>
 
         <div className="form-group">

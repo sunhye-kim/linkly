@@ -580,6 +580,13 @@
   margin-top: 4px;
 }
 
+/* AI Suggestion */
+.ai-suggestion {
+  font-size: 0.8rem;
+  color: #646cff;
+  margin-top: 4px;
+}
+
 /* Bookmark Form */
 .bookmark-form {
   background: white;
