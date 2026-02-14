@@ -1,9 +1,12 @@
 package com.linkly.bookmark;
 
 import com.linkly.bookmark.dto.BookmarkResponse;
+import com.linkly.bookmark.dto.CategorySuggestionResponse;
 import com.linkly.bookmark.dto.CreateBookmarkRequest;
 import com.linkly.bookmark.dto.UpdateBookmarkRequest;
 import com.linkly.bookmark.dto.UrlMetadataResponse;
+import com.linkly.category.CategoryService;
+import com.linkly.category.dto.CategoryResponse;
 import com.linkly.global.dto.ApiResponse;
 import com.linkly.global.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +32,8 @@ public class BookmarkController {
 
 	private final BookmarkService bookmarkService;
 	private final MetadataService metadataService;
+	private final OllamaService ollamaService;
+	private final CategoryService categoryService;
 
 	@GetMapping("/metadata")
 	@Operation(summary = "URL 메타데이터 추출", description = "URL에서 제목과 설명을 자동으로 추출합니다. 실패해도 200 OK를 반환하며, 필드가 null일 수 있습니다.")
@@ -39,6 +44,32 @@ public class BookmarkController {
 		log.info("GET /bookmarks/metadata - URL 메타데이터 추출: url={}", url);
 
 		UrlMetadataResponse response = metadataService.extractMetadata(url);
+
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
+
+	@GetMapping("/suggest-category")
+	@Operation(summary = "AI 카테고리 추천", description = "제목과 설명을 기반으로 사용자의 기존 카테고리 중 가장 적합한 카테고리를 추천합니다. Ollama 서버 미실행 시 null을 반환합니다.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "추천 완료 (추천 불가 시에도 200)")})
+	public ResponseEntity<ApiResponse<CategorySuggestionResponse>> suggestCategory(
+			@Parameter(description = "북마크 제목", example = "GitHub") @RequestParam String title,
+			@Parameter(description = "북마크 설명", example = "Where the world builds software") @RequestParam(required = false) String description) {
+		Long userId = SecurityUtils.getCurrentUserId();
+		log.info("GET /bookmarks/suggest-category - AI 카테고리 추천: userId={}, title={}", userId, title);
+
+		List<CategoryResponse> categories = categoryService.getCategoriesByUserId(userId);
+
+		if (categories.isEmpty()) {
+			return ResponseEntity.ok(ApiResponse.success(
+					CategorySuggestionResponse.builder().suggestedCategory(null).build()));
+		}
+
+		List<String> categoryNames = categories.stream()
+				.map(CategoryResponse::getName)
+				.toList();
+
+		CategorySuggestionResponse response = ollamaService.suggestCategory(title, description, categoryNames);
 
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
